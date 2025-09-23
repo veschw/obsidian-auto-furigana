@@ -1,0 +1,10 @@
+{
+	"id": "obsidian-auto-furigana",
+	"name": "AutoFurigana",
+	"version": "0.1.0",
+	"minAppVersion": "1.9.12",
+	"description": "Automatically generates and displays furigana for Japanese text. Supports manual override with markdown notation.",
+	"author": "veschw",
+	"authorUrl": "https://github.com/veschw/obsidian-auto-furigana",
+	"isDesktopOnly": false
+}

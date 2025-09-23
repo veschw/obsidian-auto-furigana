@@ -1,0 +1,26 @@
+NOTICE
+------
+
+This project includes code and data from the following third-party projects:
+
+Kuromoji
+--------
+Japanese morphological analyzer
+Copyright 2010 Atilika Inc.
+Licensed under the Apache License, Version 2.0
+http://www.apache.org/licenses/LICENSE-2.0
+
+MeCab-IPADIC
+------------
+Dictionary files for Japanese morphological analysis
+Copyright 2000-2004 Nippon Telegraph and Telephone Corporation
+Distributed under a BSD-style license
+https://taku910.github.io/mecab/
+
+Wanakana
+--------
+Japanese transliteration utility
+Copyright (c) 2017–present WaniKani
+Licensed under the MIT License
+https://github.com/WaniKani/WanaKana
+
