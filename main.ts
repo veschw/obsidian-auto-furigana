@@ -34,7 +34,7 @@ export default class AutoFurigana extends Plugin {
   private lpCompartment = new Compartment()
 
   /** Reading Mode postprocessor bound to a settings getter. */
-  public postprocessor = createReadingModePostprocessor(() => this.settings)
+  public postprocessor = createReadingModePostprocessor(this.app, () => this.settings)
 
   /**
    * Load settings from the vault and apply defaults for missing keys.
@@ -59,7 +59,7 @@ export default class AutoFurigana extends Plugin {
    */
   private applySettingsChange (prev: PluginSettings, next: PluginSettings): void {
     // Live Preview: reconfigure the CodeMirror extension based on the new state.
-    const ext: Extension = next.editingMode ? viewPlugin(next.notationStyle) : []
+    const ext: Extension = next.editingMode ? viewPlugin(this.app, next.notationStyle) : []
     this.app.workspace.iterateAllLeaves((leaf) => {
       // @ts-ignore - Obsidian's MarkdownView type
       const view = (leaf as any).view
@@ -96,7 +96,7 @@ export default class AutoFurigana extends Plugin {
    * This helper is kept for potential external calls; internal updates use applySettingsChange().
    */
   private reconfigureLivePreview (next: PluginSettings): void {
-    const ext: Extension = next.editingMode ? viewPlugin(next.notationStyle) : []
+    const ext: Extension = next.editingMode ? viewPlugin(this.app, next.notationStyle) : []
     this.app.workspace.iterateAllLeaves((leaf) => {
       // @ts-ignore - Obsidian's MarkdownView type
       const mdView = leaf.view && leaf.view.getViewType && leaf.view.getViewType() === 'markdown' ? leaf.view : null
@@ -148,9 +148,18 @@ export default class AutoFurigana extends Plugin {
 
     // Live Preview extension (CodeMirror 6).
     const initialExt: Extension = this.settings.editingMode
-      ? viewPlugin(this.settings.notationStyle)
+      ? viewPlugin(this.app, this.settings.notationStyle)
       : []
     this.registerEditorExtension(this.lpCompartment.of(initialExt))
+
+    this.registerEvent(
+      this.app.metadataCache.on('changed', (file) => {
+        // Only care about markdown files
+        if (file && (file as any).extension === 'md') {
+          this.refreshAllReadingViews()
+        }
+      })
+    )
   }
 
   /**

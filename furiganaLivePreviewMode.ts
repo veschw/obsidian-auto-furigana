@@ -14,6 +14,7 @@
  *  - The DOM for <ruby> is produced via `makeRuby` with aligned <rb>/<rt> pairs.
  */
 
+import { App } from 'obsidian'
 import { Extension, RangeSetBuilder } from '@codemirror/state'
 import {
   Decoration,
@@ -25,6 +26,7 @@ import {
 } from '@codemirror/view'
 import { NotationStyle, getManualRegex, getAutoRegex } from './regex'
 import { getFuriganaSegmentsSync, makeRuby } from './furiganaUtils'
+import { shouldSkipForEditorView } from 'skipOption'
 
 /* ------------------------------- Helpers ------------------------------- */
 
@@ -241,12 +243,16 @@ function buildDecorations (view: EditorView, style: NotationStyle): DecorationSe
  * Create the Live Preview extension for a given manual-notation style.
  * Reconfiguration is handled by the host plugin via a Compartment.
  */
-export function viewPlugin (notationStyle: NotationStyle): Extension {
+export function viewPlugin (app: App, notationStyle: NotationStyle): Extension {
   return ViewPlugin.fromClass(
     class {
       decorations: DecorationSet
 
       constructor (public view: EditorView) {
+        if (shouldSkipForEditorView(app, view)) {
+          this.decorations = Decoration.none
+          return
+        }
         this.decorations = buildDecorations(view, notationStyle)
       }
 
@@ -258,6 +264,10 @@ export function viewPlugin (notationStyle: NotationStyle): Extension {
           u.transactions.some(t => t.isUserEvent('input') || t.isUserEvent('delete')) ||
           u.view.composing !== this.view.composing
         ) {
+          if (shouldSkipForEditorView(app, this.view)) {
+            this.decorations = Decoration.none
+            return
+          }
           this.decorations = buildDecorations(this.view, notationStyle)
         }
       }

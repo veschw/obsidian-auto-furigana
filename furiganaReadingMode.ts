@@ -15,11 +15,12 @@
  *  - When no Japanese text is present, the traversal is fast and returns early.
  */
 
-import { MarkdownPostProcessor, MarkdownPostProcessorContext } from 'obsidian'
+import { App, MarkdownPostProcessor, MarkdownPostProcessorContext } from 'obsidian'
 
 import type { PluginSettings } from './settings'
 import { convertFurigana } from './furiganaUtils'
 import { getAutoRegex, getManualRegex } from './regex'
+import { shouldSkipByPath } from './skipOption'
 
 /**
  * Elements to scan inside rendered Markdown.
@@ -28,7 +29,7 @@ import { getAutoRegex, getManualRegex } from './regex'
 const TAGS = 'p, h1, h2, h3, h4, h5, h6, ol, ul, table'
 
 /**
- * Predicate for elements that must not be traversed.
+ * skip elements that must not be traversed.
  * Skips code/pre/script/style and any existing ruby subtree.
  */
 function isSkippableElement (el: Element): boolean {
@@ -64,12 +65,18 @@ function collectTextNodes (root: Node, out: Text[]): void {
  * Factory for the Markdown postprocessor used in Reading Mode.
  * The returned function reads settings via the provided getter on each run.
  */
+
 export function createReadingModePostprocessor (
+  app: App,
   getSettings: () => PluginSettings
 ): MarkdownPostProcessor {
-  return async (el: HTMLElement, _ctx: MarkdownPostProcessorContext) => {
+  return async (el: HTMLElement, ctx: MarkdownPostProcessorContext) => {
     const settings = getSettings()
+
+    // skip if switched off in settings
     if (!settings.readingMode) return
+    // skip note if disabled in frontmatter
+    if (shouldSkipByPath(app, ctx.sourcePath)) return
 
     // Query only the selected content containers.
     const blocks = el.querySelectorAll<HTMLElement>(TAGS)
