@@ -223,7 +223,7 @@ export async function ensureDictInstalled (app: App, manifest: PluginManifest): 
   }
 
   if (toInstall.length === 0) {
-    console.info(`${LOGP} All dictionary files present and valid.`)
+    // console.info(`${LOGP} All dictionary files present and valid.`)
     return
   }
 
